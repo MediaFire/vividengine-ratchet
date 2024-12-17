@@ -11,6 +11,7 @@ use React\Socket\SecureServer as SecureReactor;
  * Creates an open-ended socket to listen on a port for incoming connections.
  * Events are delegated through this to attached applications
  */
+#[\AllowDynamicProperties]
 class IoServer {
     /**
      * @var \React\EventLoop\LoopInterface
