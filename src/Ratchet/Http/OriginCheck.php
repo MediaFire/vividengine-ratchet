@@ -35,11 +35,22 @@ class OriginCheck implements HttpServerInterface {
         $header = (string)$request->getHeader('Origin')[0];
         $origin = parse_url($header, PHP_URL_HOST) ?: $header;
 
-        if (!in_array($origin, $this->allowedOrigins)) {
-            return $this->close($conn, 403);
+        foreach ($this->allowedOrigins as $pattern) {
+            // Check for wildcard pattern
+            if (strpos($pattern, '*.') === 0) {
+                $domain = substr($pattern, 2); // Remove *. from pattern
+                // Check if origin ends with the domain and has proper subdomain structure
+                if (preg_match('/^[a-zA-Z0-9-]+\.' . preg_quote($domain, '/') . '$/', $origin)) {
+                    return $this->_component->onOpen($conn, $request);
+                }
+            }
+            // Direct match check
+            elseif ($origin === $pattern) {
+                return $this->_component->onOpen($conn, $request);
+            }
         }
 
-        return $this->_component->onOpen($conn, $request);
+        return $this->close($conn, 403);
     }
 
     /**
