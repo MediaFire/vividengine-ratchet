@@ -17,7 +17,7 @@ class WampConnection extends AbstractConnectionDecorator {
         parent::__construct($conn);
 
         $this->WAMP            = new \StdClass;
-        $this->WAMP->sessionId = str_replace('.', '', uniqid(mt_rand(), true));
+        $this->WAMP->sessionId = bin2hex(random_bytes(32));
         $this->WAMP->prefixes  = array();
 
         $this->send(json_encode(array(WAMP::MSG_WELCOME, $this->WAMP->sessionId, 1, \Ratchet\VERSION)));
@@ -86,7 +86,7 @@ class WampConnection extends AbstractConnectionDecorator {
         if (preg_match('/http(s*)\:\/\//', $uri) == false) {
             if (strpos($uri, $curieSeperator) !== false) {
                 list($prefix, $action) = explode($curieSeperator, $uri);
-                
+
                 if(isset($this->WAMP->prefixes[$prefix]) === true){
                   return $this->WAMP->prefixes[$prefix] . '#' . $action;
                 }
